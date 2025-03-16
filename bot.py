@@ -5,6 +5,7 @@ import requests
 from flask import Flask, jsonify
 import threading
 import json
+import asyncio
 
 mineflayer = require('mineflayer')
 
@@ -35,39 +36,43 @@ def connect():
             print(f'{username} spawned')
             oldAccsInAuth = []
 
-            while True:
-                newAccsInAuth = []
-                for i in bot.teamMap:
-                    try:
-                        if bot.teamMap[i]['color'] == 'white':
-                            for member in bot.teamMap[i].membersMap:
-                                newAccsInAuth.append(member)
-                    except:
-                        pass
+            async def monitor_auth():
+                nonlocal oldAccsInAuth
+                while True:
+                    newAccsInAuth = []
+                    for i in bot.teamMap:
+                        try:
+                            if bot.teamMap[i]['color'] == 'white':
+                                for member in bot.teamMap[i].membersMap:
+                                    newAccsInAuth.append(member)
+                        except:
+                            pass
 
-                for acc in newAccsInAuth:
-                    if acc not in oldAccsInAuth:
-                        requests.post(webhook_url, json={'content': f'🔑 `{acc}` joined auth server'})
+                    for acc in newAccsInAuth:
+                        if acc not in oldAccsInAuth:
+                            await bot.chat_add_message(webhook_url, json={'content': f'🔑 `{acc}` joined auth server'})
 
-                for acc in oldAccsInAuth:
-                    passedAuth = False
-                    if acc not in newAccsInAuth:
-                        for i in bot.teamMap:
-                            try:
-                                for j in bot.teamMap[i].membersMap:
-                                    if j == acc:
-                                        requests.post(webhook_url, json={'content': f'✅ `{acc}` passed auth'})
-                                        passedAuth = True
-                                        break
-                            except:
-                                pass
-                        if not passedAuth:
-                            requests.post(webhook_url, json={'content': f'❌ `{acc}` left auth'})
+                    for acc in oldAccsInAuth:
+                        passedAuth = False
+                        if acc not in newAccsInAuth:
+                            for i in bot.teamMap:
+                                try:
+                                    for j in bot.teamMap[i].membersMap:
+                                        if j == acc:
+                                            await bot.chat_add_message(webhook_url, json={'content': f'✅ `{acc}` passed auth'})
+                                            passedAuth = True
+                                            break
+                                except:
+                                    pass
+                            if not passedAuth:
+                                await bot.chat_add_message(webhook_url, json={'content': f'❌ `{acc}` left auth'})
 
-                oldAccsInAuth = newAccsInAuth
-                with open('accounts.json', 'w') as f:
-                    json.dump(oldAccsInAuth, f)
-                time.sleep(5)
+                    oldAccsInAuth = newAccsInAuth
+                    with open('accounts.json', 'w') as f:
+                        json.dump(oldAccsInAuth, f)
+                    await asyncio.sleep(5)
+
+            bot.loop.create_task(monitor_auth())
 
         @On(bot, 'end')
         def handle_end(*args):
