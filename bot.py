@@ -5,7 +5,6 @@ import requests
 from flask import Flask, jsonify
 import threading
 import json
-import asyncio
 
 mineflayer = require('mineflayer')
 
@@ -36,7 +35,7 @@ def connect():
             print(f'{username} spawned')
             oldAccsInAuth = []
 
-            async def monitor_auth():
+            def monitor_auth():
                 nonlocal oldAccsInAuth
                 while True:
                     newAccsInAuth = []
@@ -50,7 +49,7 @@ def connect():
 
                     for acc in newAccsInAuth:
                         if acc not in oldAccsInAuth:
-                            await bot.chat_add_message(webhook_url, json={'content': f'🔑 `{acc}` joined auth server'})
+                            requests.post(webhook_url, json={'content': f'🔑 `{acc}` joined auth server'})
 
                     for acc in oldAccsInAuth:
                         passedAuth = False
@@ -59,21 +58,22 @@ def connect():
                                 try:
                                     for j in bot.teamMap[i].membersMap:
                                         if j == acc:
-                                            await bot.chat_add_message(webhook_url, json={'content': f'✅ `{acc}` passed auth'})
+                                            requests.post(webhook_url, json={'content': f'✅ `{acc}` passed auth'})
                                             passedAuth = True
                                             break
                                 except:
                                     pass
                             if not passedAuth:
-                                await bot.chat_add_message(webhook_url, json={'content': f'❌ `{acc}` left auth'})
+                                requests.post(webhook_url, json={'content': f'❌ `{acc}` left auth'})
 
                     oldAccsInAuth = newAccsInAuth
                     with open('accounts.json', 'w') as f:
                         json.dump(oldAccsInAuth, f)
-                    await asyncio.sleep(5)
+                    time.sleep(5)
 
-            loop = asyncio.get_event_loop()
-            loop.create_task(monitor_auth())
+            monitor_thread = threading.Thread(target=monitor_auth)
+            monitor_thread.daemon = True
+            monitor_thread.start()
 
         @On(bot, 'end')
         def handle_end(*args):
