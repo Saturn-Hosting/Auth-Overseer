@@ -84,7 +84,7 @@ def connect():
 
     except Exception as e:
         print(e)
-        time.sleep(5)
+        time.sleep(20)
         connect()
 
 @app.route('/current-accounts', methods=['GET'])
