@@ -81,13 +81,6 @@ def connect():
             time.sleep(5)
             connect()
 
-        @On(bot, 'kicked')
-        def handle_kicked(*args):
-            print(f'{username} kicked')
-            print(args)
-            time.sleep(5)
-            connect()
-
     except Exception as e:
         print(e)
         time.sleep(20)
