@@ -9,7 +9,12 @@ services:
     working_dir: /app
     command: >
       bash -c "
+        apt-get update &&
+        apt-get install -y curl &&
+        curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&
+        apt-get install -y nodejs &&
         pip install --no-cache-dir -r requirements.txt &&
+        npm install &&
         python bot.py
       "
     environment:
