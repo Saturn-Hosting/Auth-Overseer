@@ -4,6 +4,7 @@ services:
   auth_overseer:
     image: python:3.9-slim
     container_name: Auth-Overseer
+    restart: unless-stopped
     ports:
       - "5069:5069"
     volumes:
