@@ -47,7 +47,7 @@ def connect():
 
                 for acc in newAccsInAuth:
                     if acc not in oldAccsInAuth:
-                        requests.post(webhook_url, json={'content': f'🔑 **{acc}** joined auth server'})
+                        requests.post(webhook_url, json={'content': f'🔑 `{acc}` joined auth server'})
 
                 for acc in oldAccsInAuth:
                     passedAuth = False
@@ -56,13 +56,13 @@ def connect():
                             try:
                                 for j in bot.teamMap[i].membersMap:
                                     if j == acc:
-                                        requests.post(webhook_url, json={'content': f'✅ **{acc}** passed auth'})
+                                        requests.post(webhook_url, json={'content': f'✅ `{acc}` passed auth'})
                                         passedAuth = True
                                         break
                             except:
                                 pass
                         if not passedAuth:
-                            requests.post(webhook_url, json={'content': f'❌ **{acc}** left auth'})
+                            requests.post(webhook_url, json={'content': f'❌ `{acc}` left auth'})
 
                 oldAccsInAuth = newAccsInAuth
                 with open('accounts.json', 'w') as f:
