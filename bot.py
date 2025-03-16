@@ -4,6 +4,7 @@ import random
 import requests
 from flask import Flask, jsonify
 import threading
+import json
 
 mineflayer = require('mineflayer')
 
@@ -12,7 +13,8 @@ allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 webhook_url = "https://discord.com/api/webhooks/1350822392850546709/pyDfo-aarTvbzWs-rf09a8YRuv7_f7FIXcajAqDO85vj8mT9Rs1GmoZ08UuRurytZKop"
 
 app = Flask(__name__)
-current_accounts_in_auth = []
+with open('accounts.json', 'w') as f:
+    f.write('{}')
 
 def getUsername():
     return 'Apostle_' + ''.join(random.choices(allowedChars, k=7))
@@ -63,7 +65,8 @@ def connect():
                             requests.post(webhook_url, json={'content': f'❌ **{acc}** left auth'})
 
                 oldAccsInAuth = newAccsInAuth
-                current_accounts_in_auth = newAccsInAuth  # Update the global list
+                with open('accounts.json', 'w') as f:
+                    json.dump(oldAccsInAuth, f)
                 time.sleep(5)
 
         @On(bot, 'end')
@@ -86,7 +89,8 @@ def connect():
 
 @app.route('/current-accounts', methods=['GET'])
 def get_current_accounts():
-    return jsonify(current_accounts_in_auth)
+    with open('accounts.json', 'r') as f:
+        return jsonify(json.load(f))
 
 def run_flask():
     app.run(host='0.0.0.0', port=5069)
