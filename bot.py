@@ -33,7 +33,8 @@ def connect():
         @On(bot, 'spawn')
         def handle_spawned(*args):
             print(f'{username} spawned')
-            oldAccsInAuth = []
+            with open('accounts.json', 'r') as f:
+                oldAccsInAuth = json.load(f)
 
             def monitor_auth():
                 nonlocal oldAccsInAuth
