@@ -72,7 +72,8 @@ def connect():
                         json.dump(oldAccsInAuth, f)
                     await asyncio.sleep(5)
 
-            asyncio.create_task(monitor_auth())
+            loop = asyncio.get_event_loop()
+            loop.create_task(monitor_auth())
 
         @On(bot, 'end')
         def handle_end(*args):
